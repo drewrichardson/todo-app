@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Todo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
+    
+    <style>
+        body{
+            padding: 20px;
+        }
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        tr.htmx-swapping td {
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+        }
+
+        td, th {
+            border: 1px solid #383737;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<h1>TODO List</h1>
+    <form hx-post="/submit" hx-swap="beforeend" hx-target="#new-task" class="mb-3">
+        <input type="text" placeholder="Task Title" name="title" class="form-control mb-3" />
+        <input type="number" placeholder="Task Estimate" name="estimate" class="form-control mb-3" />
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+            <option value="Open">Open</option>
+            <option value="Started">Started</option>
+            <option value="Done">Done</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Task Id</th>
+            <th scope="col">Task Name</th>
+            <th scope="col">Task Estimate</th>
+            <th scope="col">Task Status</th>
+          </tr>
+        </thead>
+        <tbody id="new-task" hx-target="closest tr" hx-swap="outerHTML swap:0.5s"> 
+            {% if tasks %}
+                {%for task in tasks%}
+                <tr>
+                    <td>{{task.task_id}}</td>
+                    <td>{{task.title}}</td>
+                    <td>{{task.estimate}}</td>
+                    <td>{{task.status}}</td>
+                    <td>
+                        <button class="btn btn-primary" 
+                            hx-get="/get-edit-form/{{task.task_id}}">
+                            Edit Task
+                        </button>
+                    </td>
+                    <td>
+                        <button hx-delete="/delete/{{task.task_id}}" class="btn btn-primary">Delete</button>
+                    </td>
+                </tr>
+                {%endfor%}
+            {% else %}
+                <p>No tasks!</p>
+            {% endif %}
+        </tbody>
+    </table>
+
+</html>
